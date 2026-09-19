@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çocuklar İçin Yapay Zeka Atölyesi</title>
+    <!-- Tailwind CSS for quick, nice UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Blockly Core -->
+    <script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/msg/tr.js"></script>
+    
+    <!-- ML5.js & TensorFlow.js for AI tasks -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.js"></script>
+    <script src="https://unpkg.com/ml5@0.12.2/dist/ml5.min.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-blue-50 text-slate-800 font-sans h-screen flex flex-col overflow-hidden">
+    
+    <!-- Header -->
+    <header class="bg-indigo-600 text-white p-4 shadow-md flex justify-between items-center z-10 relative">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-robot text-3xl"></i>
+            <h1 class="text-2xl font-bold">YZ Kaşifleri - Yapay Zeka Atölyesi</h1>
+        </div>
+        <button id="runBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-full shadow-lg transition transform hover:scale-105 flex items-center gap-2">
+            <i class="fa-solid fa-play"></i> Kodu Çalıştır
+        </button>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex flex-1 overflow-hidden">
+        
+        <!-- Sidebar - Lessons -->
+        <aside class="w-72 bg-white shadow-lg overflow-y-auto flex-shrink-0 z-10" id="sidebar">
+            <div class="p-4 bg-indigo-100 font-bold text-indigo-800 border-b border-indigo-200">
+                📚 Dersler
+            </div>
+            <ul id="lessonList" class="divide-y divide-gray-100">
+                <!-- Lessons will be injected here via JS -->
+            </ul>
+        </aside>
+
+        <!-- Center - Blockly Workspace -->
+        <main class="flex-1 flex flex-col relative min-w-0">
+            <!-- Lesson Header -->
+            <div class="bg-white rounded-xl shadow-sm p-5 flex flex-col justify-between">
+                <div>
+                    <h2 id="lessonTitle" class="text-2xl font-bold text-indigo-900">Ders Seçin</h2>
+                    <p id="lessonDesc" class="text-gray-600 mt-2">Sol menüden bir ders seçerek başlayın.</p>
+                </div>
+                <div id="levelButtons" class="mt-4 flex gap-2 hidden">
+                    <button class="level-btn flex-1 py-1.5 px-3 bg-indigo-50 text-indigo-700 text-sm font-semibold rounded hover:bg-indigo-100 transition-colors border border-indigo-200" data-level="1">Seviye 1</button>
+                    <button class="level-btn flex-1 py-1.5 px-3 bg-indigo-50 text-indigo-700 text-sm font-semibold rounded hover:bg-indigo-100 transition-colors border border-indigo-200" data-level="2">Seviye 2</button>
+                    <button class="level-btn flex-1 py-1.5 px-3 bg-indigo-50 text-indigo-700 text-sm font-semibold rounded hover:bg-indigo-100 transition-colors border border-indigo-200" data-level="3">Seviye 3</button>
+                    <button class="level-btn flex-1 py-1.5 px-3 bg-indigo-50 text-indigo-700 text-sm font-semibold rounded hover:bg-indigo-100 transition-colors border border-indigo-200" data-level="4">Seviye 4</button>
+                    <button class="level-btn flex-1 py-1.5 px-3 bg-indigo-50 text-indigo-700 text-sm font-semibold rounded hover:bg-indigo-100 transition-colors border border-indigo-200" data-level="5">Seviye 5</button>
+                </div>
+            </div>
+            <!-- Blockly Container -->
+            <div id="blocklyDiv" class="flex-1 w-full relative"></div>
+        </main>
+
+        <!-- Right Panel - Output / Camera -->
+        <aside class="w-80 bg-gray-900 text-white flex flex-col flex-shrink-0 shadow-inner relative z-10">
+            <div class="p-3 bg-gray-800 font-semibold border-b border-gray-700 flex justify-between items-center">
+                <span><i class="fa-solid fa-desktop"></i> Sonuç Ekranı</span>
+                <button id="clearBtn" class="text-xs text-gray-400 hover:text-white transition"><i class="fa-solid fa-trash"></i> Temizle</button>
+            </div>
+            
+            <!-- Output Console -->
+            <div id="outputConsole" class="flex-1 p-4 overflow-y-auto font-mono text-sm text-green-400 space-y-2">
+                <div>> Sistem hazır. Kodlarınızı bekliyor...</div>
+            </div>
+
+            <!-- Media Area (Camera/Canvas) -->
+            <div id="mediaArea" class="h-64 bg-black border-t border-gray-700 relative hidden flex-col items-center justify-center overflow-hidden">
+                <span id="mediaPlaceholder" class="text-gray-500 text-sm"><i class="fa-solid fa-camera mb-2 text-2xl block text-center"></i>Kamera Kapalı</span>
+                <!-- Video or Canvas element will be injected here -->
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- Toolbox XML (Hidden) -->
+    <xml xmlns="https://developers.google.com/blockly/xml" id="toolbox" style="display: none">
+        <!-- Categories will be dynamic based on lesson, but here is a base -->
+        <category name="Mantık" colour="#5b80a5">
+            <block type="controls_if"></block>
+            <block type="logic_compare"></block>
+            <block type="logic_operation"></block>
+            <block type="logic_boolean"></block>
+        </category>
+        <category name="Döngüler" colour="#5ba55b">
+            <block type="controls_repeat_ext">
+                <value name="TIMES">
+                    <shadow type="math_number">
+                        <field name="NUM">10</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="controls_whileUntil"></block>
+            <block type="controls_flow_statements"></block>
+        </category>
+        <category name="Matematik" colour="#5b67a5">
+            <block type="math_number"></block>
+            <block type="math_arithmetic"></block>
+            <block type="math_random_int">
+                <value name="FROM">
+                    <shadow type="math_number"><field name="NUM">1</field></shadow>
+                </value>
+                <value name="TO">
+                    <shadow type="math_number"><field name="NUM">100</field></shadow>
+                </value>
+            </block>
+        </category>
+        <category name="Metin" colour="#5ba58c">
+            <block type="text"></block>
+            <block type="text_print"></block>
+            <block type="text_join"></block>
+        </category>
+        <category name="Değişkenler" colour="#a55b80" custom="VARIABLE"></category>
+        <sep></sep>
+        <category name="Yapay Zeka" colour="#a55b80" id="aiCategory">
+            <block type="ai_bekle">
+                <field name="SECONDS">1</field>
+            </block>
+            <block type="ai_arkaplan_renk"></block>
+            <block type="ai_kamera_ac"></block>
+            <block type="ai_kamera_kapat"></block>
+            <block type="ai_renk_filtresi"></block>
+            <block type="ai_yuz_tespit_et"></block>
+            <block type="ai_el_tespit_et"></block>
+            <block type="ai_parmak_say"></block>
+            <block type="ai_metni_seslendir"></block>
+            <block type="ai_ses_dinle"></block>
+            <block type="ai_ses_seviyesi"></block>
+            <block type="ai_gorsel_siniflandir"></block>
+        </category>
+    </xml>
+
+    <script src="lessons.js"></script>
+    <script src="lesson-levels.js"></script>
+    <script src="lesson-workspaces.js"></script> <!-- Fallback -->
+    <script src="blocks-ai.js"></script>
+    <script src="app.js"></script>
+    
+    <!-- Auto-fill override for index3.html (5 Levels) -->
+    <script>
+        const originalLoadLesson = loadLesson;
+        let currentLoadedLessonId = 1;
+
+        loadLesson = function(id) {
+            originalLoadLesson(id);
+            currentLoadedLessonId = id;
+            
+            // Show level buttons
+            const levelButtons = document.getElementById('levelButtons');
+            levelButtons.classList.remove('hidden');
+            
+            // Reset button styles
+            document.querySelectorAll('.level-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white');
+                btn.classList.add('bg-indigo-50', 'text-indigo-700');
+            });
+
+            // Automatically load Level 1 (or the first available level)
+            loadLevel(1);
+        };
+
+        function loadLevel(levelNum) {
+            // Update UI buttons
+            document.querySelectorAll('.level-btn').forEach(btn => {
+                if (parseInt(btn.getAttribute('data-level')) === levelNum) {
+                    btn.classList.remove('bg-indigo-50', 'text-indigo-700');
+                    btn.classList.add('bg-indigo-600', 'text-white');
+                } else {
+                    btn.classList.remove('bg-indigo-600', 'text-white');
+                    btn.classList.add('bg-indigo-50', 'text-indigo-700');
+                }
+            });
+
+            // Check if we have progressive levels for this lesson
+            if (typeof lessonLevels !== 'undefined' && lessonLevels[currentLoadedLessonId] && lessonLevels[currentLoadedLessonId][levelNum]) {
+                xmlText = lessonLevels[currentLoadedLessonId][levelNum];
+            } 
+            // Fallback to the massive master workspace if specific level isn't found
+            else if (typeof lessonWorkspaces !== 'undefined' && lessonWorkspaces[currentLoadedLessonId]) {
+                xmlText = lessonWorkspaces[currentLoadedLessonId];
+            }
+
+            // We do NOT load the XML into the workspace here, because this is the 
+            // empty student version. We only clear the workspace.
+            workspace.clear();
+        }
+
+        // Attach event listeners to level buttons
+        document.querySelectorAll('.level-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const level = parseInt(e.target.getAttribute('data-level'));
+                loadLevel(level);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+/* Custom adjustments over Tailwind */
+
+/* Blockly workspace styles */
+.blocklySvg {
+    background-color: #f8fafc; /* Tailwind slate-50 */
+}
+
+.blocklyToolboxDiv {
+    background-color: #ffffff;
+    border-right: 1px solid #e2e8f0; /* Tailwind slate-200 */
+    box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+}
+
+.blocklyTreeLabel {
+    font-family: inherit;
+    font-size: 15px;
+}
+
+/* Custom scrollbar for sidebar and output */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+#outputConsole::-webkit-scrollbar-thumb {
+    background: #475569;
+}
+
+/* Lesson list item styles */
+.lesson-item {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.lesson-item:hover {
+    background-color: #e0e7ff; /* indigo-100 */
+}
+.lesson-item.active {
+    background-color: #4f46e5; /* indigo-600 */
+    color: white;
+    border-left: 4px solid #312e81; /* indigo-900 */
+}
+.lesson-item.active .lesson-icon {
+    color: #c7d2fe; /* indigo-200 */
+}
+
+/* Make camera video fit */
+#mediaArea video, #mediaArea canvas {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
