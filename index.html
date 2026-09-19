@@ -140,6 +140,9 @@
             <block type="ai_metni_seslendir"></block>
             <block type="ai_ses_dinle"></block>
             <block type="ai_ses_seviyesi"></block>
+            <block type="ai_sanal_imlec_ac"></block>
+            <block type="ai_sanal_imlec_sesle"></block>
+            <block type="ai_sanal_imlec_tikla"></block>
             <block type="ai_gorsel_siniflandir"></block>
         </category>
     </xml>
@@ -185,17 +188,7 @@
                 }
             });
 
-            // Check if we have progressive levels for this lesson
-            if (typeof lessonLevels !== 'undefined' && lessonLevels[currentLoadedLessonId] && lessonLevels[currentLoadedLessonId][levelNum]) {
-                xmlText = lessonLevels[currentLoadedLessonId][levelNum];
-            } 
-            // Fallback to the massive master workspace if specific level isn't found
-            else if (typeof lessonWorkspaces !== 'undefined' && lessonWorkspaces[currentLoadedLessonId]) {
-                xmlText = lessonWorkspaces[currentLoadedLessonId];
-            }
-
-            // We do NOT load the XML into the workspace here, because this is the 
-            // empty student version. We only clear the workspace.
+            // Just clear the workspace for the student to solve
             workspace.clear();
         }
 
